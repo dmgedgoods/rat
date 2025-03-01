@@ -34,38 +34,40 @@ void handle_client(int client_sock) {
         pclose(fp);		// close pointer file created by popen
     }
 
-    if (bytes_received == 0) {
-        printf("Disconnected\n");
+    if (bytes_received == 0) {		// check results
+        printf("Disconnected\n");	// good exit
     } else if (bytes_received == -1) {
-        perror("recv");
+        perror("recv");		// bad exit
     }
 
-    close(client_sock);
+    close(client_sock);		// close the socket
 
 }
 
 int main() {
-    int server_sock, client_sock;
+    int server_sock, client_sock;						// variables and structs to store addresses
     struct sockaddr_in server_addr, client_addr;
     socklen_t client_addr_len = sizeof(client_addr);
 
-    server_sock = socket(AF_INET, SOCK_STREAM, 0);
+    server_sock = socket(AF_INET, SOCK_STREAM, 0);		// actual socket creation
     if (server_sock == -1) {
         perror("Socket creatuon failed!");
         return 1;
     }
 
-    server_addr.sin_family = AF_INET;
-    server_addr.sin_port = htons(SERVER_PORT);
-    server_addr.sin_addr.s_addr = INADDR_ANY;
+    server_addr.sin_family = AF_INET;		// ipv4
+    server_addr.sin_port = htons(SERVER_PORT);		// port number. htons converts port number to network byte order***
+    server_addr.sin_addr.s_addr = INADDR_ANY;		// set to any available interface
 
+	// bind socket to server address
     if (bind(server_sock, (struct sockaddr *)&server_addr, sizeof(server_addr)) == -1) {
         perror("Bind fail");
         close(server_sock);
         return 1;
     }
 
-    if (listen(server_sock, 5) == -1) {
+	// listen
+    if (listen(server_sock, 5) == -1) {		// listen for up to 5 connections. Change per use case
         perror("Listen fail");
         close(server_sock);
         return 1;
@@ -73,19 +75,21 @@ int main() {
 
     printf("Server listening on port %d...\n", SERVER_PORT);
 
+	// main loop to accept connections
     while (1) {
-        client_sock = accept(server_sock, (struct sockaddr *)&client_addr, &client_addr_len);
+        client_sock = accept(server_sock, (struct sockaddr *)&client_addr, &client_addr_len);  // accept client connect
         if (client_sock == -1) {
             perror("Accept fail");
             continue;
         }
 
+		// convert address to string and print. Need to add ability to send commands and show progress here.
         printf("Client connected: %s:%d\n", inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port));
 
         handle_client(client_sock);
 
     }
 
-    close(server_sock);
+    close(server_sock);		// clean close socket
     return 0;
 }
