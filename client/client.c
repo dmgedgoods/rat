@@ -13,7 +13,8 @@
 #define SERVER_PORT 6969
 #define BUFFER_SIZE 1024    // enough space to fit header plus extras
 
-// Function for executing our commmands on system
+// Function for executing our commmands on system. Needs server logic. This simply connects and
+// shows the connection.
 
 void execute_command(int sock) {
     char buffer[BUFFER_SIZE];   //Create buffer to store commands and responses
