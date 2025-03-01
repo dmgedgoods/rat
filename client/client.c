@@ -8,7 +8,7 @@
 
 // Defining constants
 
-#define SERVER_IP "100.76.130.61"
+#define SERVER_IP "100.76.130.61" // ts
 //#define SERVER_IP "127.0.0.1"
 #define SERVER_PORT 6969
 #define BUFFER_SIZE 1024    // enough space to fit header plus extras
